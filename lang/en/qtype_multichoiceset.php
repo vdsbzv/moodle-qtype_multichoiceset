@@ -34,3 +34,4 @@ $string['pluginnameediting'] = 'Editing an All-or-Nothing Multiple Choice Questi
 $string['pluginnamesummary'] = 'Allows the selection of multiple responses from a pre-defined list and uses all-or-nothing grading (100% or 0%).';
 $string['correctanswer'] = 'Correct';
 $string['showeachanswerfeedback'] = 'Show the feedback for the selected responses.';
+$string['nograce'] = 'No grace!';

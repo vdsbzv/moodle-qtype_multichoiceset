@@ -36,6 +36,8 @@ require_once($CFG->dirroot . '/question/type/multichoice/question.php');
  */
 class qtype_multichoiceset_question extends qtype_multichoice_multi_question {
 
+    public $nograce;
+
     /**
      * @author Philipp Steingrebe <psteingrebe@vds.de>
      *
@@ -47,6 +49,7 @@ class qtype_multichoiceset_question extends qtype_multichoice_multi_question {
      */
     
     public function grade_response(array $response) {
+
         // Get number of right answers and total answer possibilities
         list($numRight, $numTotal) = $this->get_num_parts_right($response);
         
@@ -59,11 +62,12 @@ class qtype_multichoiceset_question extends qtype_multichoice_multi_question {
 
         switch (true) {
             // No wrong and all correct answers selected -> full points
-            case $numwrong == 0 && $numcorrect == $numright:
+            case $numWrong == 0 && $numCorrect == $numright:
                 $fraction = 1;
                 break;
             // No wrong but not all correct answers selected -> half points
-            case $numwrong == 0 && $numcorrect > 0:
+            // And nograce is false
+            case !$this->nograce && $numWrong == 0 && $numCorrect > 0:
                 $fraction = 0.5;
                 break;
             // Otherwise -> zero points

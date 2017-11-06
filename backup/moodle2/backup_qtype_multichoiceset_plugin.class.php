@@ -61,7 +61,7 @@ class backup_qtype_multichoiceset_plugin extends backup_qtype_plugin {
         $pluginwrapper->add_child($multichoiceset);
 
         // set source to populate the data
-        $multichoiceset->set_source_table('question_multichoiceset', array('question' => backup::VAR_PARENTID));
+        $multichoiceset->set_source_table('qtype_multichoiceset_options', array('question' => backup::VAR_PARENTID));
 
         // don't need to annotate ids nor files
 

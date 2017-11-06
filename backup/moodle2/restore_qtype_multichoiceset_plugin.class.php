@@ -66,7 +66,7 @@ class restore_qtype_multichoiceset_plugin extends restore_qtype_plugin {
         $newquestionid   = $this->get_new_parentid('question');
         $questioncreated = (bool) $this->get_mappingid('question_created', $oldquestionid);
 
-        // If the question has been created by restore, we need to create its question_multichoiceset too
+        // If the question has been created by restore, we need to create its qtype_multichoiceset_options too
         if ($questioncreated) {
             // Adjust some columns
             $data->question = $newquestionid;
@@ -81,9 +81,9 @@ class restore_qtype_multichoiceset_plugin extends restore_qtype_plugin {
             }
             $data->answers = implode(',', $answersarr);
             // Insert record
-            $newitemid = $DB->insert_record('question_multichoiceset', $data);
+            $newitemid = $DB->insert_record('qtype_multichoiceset_options', $data);
             // Create mapping (needed for decoding links)
-            $this->set_mapping('question_multichoiceset', $oldid, $newitemid);
+            $this->set_mapping('qtype_multichoiceset_options', $oldid, $newitemid);
         }
     }
 
@@ -161,7 +161,7 @@ class restore_qtype_multichoiceset_plugin extends restore_qtype_plugin {
         $contents = array();
 
         $fields = array('correctfeedback', 'incorrectfeedback');
-        $contents[] = new restore_decode_content('question_multichoiceset', $fields, 'question_multichoiceset');
+        $contents[] = new restore_decode_content('qtype_multichoiceset_options', $fields, 'qtype_multichoiceset_options');
 
         return $contents;
     }

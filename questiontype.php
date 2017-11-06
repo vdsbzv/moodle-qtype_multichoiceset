@@ -47,8 +47,8 @@ class qtype_multichoiceset extends question_type {
 
     public function get_question_options($question) {
         global $DB, $OUTPUT;
-        $question->options = $DB->get_record('question_multichoiceset',
-                array('question' => $question->id), '*', MUST_EXIST);
+        $question->options = $DB->get_record('qtype_multichoiceset_options',
+                array('questionid' => $question->id), '*', MUST_EXIST);
         parent::get_question_options($question);
     }
 
@@ -117,13 +117,13 @@ class qtype_multichoiceset extends question_type {
             $DB->delete_records('question_answers', array('id' => $oldanswer->id));
         }
 
-        $options = $DB->get_record('question_multichoiceset', array('question' => $question->id));
+        $options = $DB->get_record('qtype_multichoiceset_options', array('questionid' => $question->id));
         if (!$options) {
             $options = new stdClass();
             $options->question = $question->id;
             $options->correctfeedback = '';
             $options->incorrectfeedback = '';
-            $options->id = $DB->insert_record('question_multichoiceset', $options);
+            $options->id = $DB->insert_record('qtype_multichoiceset_options', $options);
         }
 
         $options->answers = implode(',', $answers);
@@ -132,6 +132,7 @@ class qtype_multichoiceset extends question_type {
         }
         $options->answernumbering = $question->answernumbering;
         $options->shuffleanswers = $question->shuffleanswers;
+        $options->nograce = $question->nograce;
         $options->correctfeedback = $this->import_or_save_files($question->correctfeedback,
                 $context, 'qtype_multichoiceset', 'correctfeedback', $question->id);
         $options->correctfeedbackformat = $question->correctfeedback['format'];
@@ -141,7 +142,7 @@ class qtype_multichoiceset extends question_type {
 		$options->shownumcorrect = !empty($question->shownumcorrect);
         
 
-        $DB->update_record('question_multichoiceset', $options);
+        $DB->update_record('qtype_multichoiceset_options', $options);
         $this->save_hints($question, true);
     }
 
@@ -243,6 +244,7 @@ class qtype_multichoiceset extends question_type {
         } else {
             $question->layout = qtype_multichoice_single_question::LAYOUT_VERTICAL;
         }
+        $question->nograce = (int)$questiondata->options->nograce;
         $question->correctfeedback = $questiondata->options->correctfeedback;
         $question->correctfeedbackformat = $questiondata->options->correctfeedbackformat;
         $question->incorrectfeedback = $questiondata->options->incorrectfeedback;
@@ -254,7 +256,7 @@ class qtype_multichoiceset extends question_type {
 
     public function delete_question($questionid, $contextid) {
         global $DB;
-        $DB->delete_records('question_multichoiceset', array('question' => $questionid));
+        $DB->delete_records('qtype_multichoiceset_options', array('questionid' => $questionid));
         return parent::delete_question($questionid, $contextid);
     }
 

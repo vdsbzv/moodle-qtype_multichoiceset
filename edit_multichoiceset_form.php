@@ -40,16 +40,45 @@ class qtype_multichoiceset_edit_form extends question_edit_form {
      * @param object $mform the form being built.
      */
     protected function definition_inner($mform) {
-        $mform->addElement('advcheckbox', 'shuffleanswers',
-                get_string('shuffleanswers', 'qtype_multichoice'), null, null, array(0, 1));
+        // Shuffle answers checkbox
+        $mform->addElement(
+            'advcheckbox', 
+            'shuffleanswers',
+            get_string('shuffleanswers', 'qtype_multichoice'),
+            null,
+            null,
+            array(0, 1)
+        );
         $mform->addHelpButton('shuffleanswers', 'shuffleanswers', 'qtype_multichoice');
         $mform->setDefault('shuffleanswers', 1);
 
-        $mform->addElement('select', 'answernumbering',
-                get_string('answernumbering', 'qtype_multichoice'),
-                qtype_multichoice::get_numbering_styles());
+        // Ansernumbering select
+        $mform->addElement(
+            'select', 
+            'answernumbering',
+            get_string('answernumbering', 'qtype_multichoice'),
+            qtype_multichoice::get_numbering_styles()
+        );
         $mform->setDefault('answernumbering', 'abc');
 
+        // No grace
+        $mform->addElement(
+            'advcheckbox', 
+            'nograce',
+            get_string('nograce', 'qtype_multichoiceset'),
+            null,
+            null,
+            array(0, 1)
+        );
+        $mform->setDefault('nograce', 0);
+
+        /*
+            &$mform, 
+            $label, 
+            $gradeoptions,
+            $minoptions = QUESTION_NUMANS_START, 
+            $addoptions = QUESTION_NUMANS_ADD
+        */
         $this->add_per_answer_fields($mform, get_string('choiceno', 'qtype_multichoice', '{no}'),
                 null, max(5, QUESTION_NUMANS_START));
 
@@ -72,16 +101,12 @@ class qtype_multichoiceset_edit_form extends question_edit_form {
     protected function get_per_answer_fields($mform, $label, $gradeoptions,
             &$repeatedoptions, &$answersoption) {
         $repeated = array();
-        $repeated[] = $mform->createElement('header', 'choicehdr',
-                get_string('choiceno', 'qtype_multichoice', '{no}'));
         $repeated[] = $mform->createElement('editor', 'answer',
-                get_string('answer', 'question'), array('rows' => 1), $this->editoroptions);
+                $label, array('rows' => 1), $this->editoroptions);
         $repeated[] = $mform->createElement('checkbox', 'correctanswer',
                 get_string('correctanswer', 'qtype_multichoiceset'));
         $repeated[] = $mform->createElement('editor', 'feedback',
                 get_string('feedback', 'question'), array('rows' => 1), $this->editoroptions);
-
-        // These are returned by arguments passed by reference.
         $repeatedoptions['answer']['type'] = PARAM_RAW;
         $answersoption = 'answers';
 
@@ -121,6 +146,7 @@ class qtype_multichoiceset_edit_form extends question_edit_form {
             $question->shuffleanswers =  $question->options->shuffleanswers;
             $question->answernumbering =  $question->options->answernumbering;
 			$question->shownumcorrect = $question->options->shownumcorrect;
+            $question->nograce = $question->options->nograce;
             // prepare feedback editor to display files in draft area
             foreach (array('correctfeedback', 'incorrectfeedback') as $feedbackname) {
                 $draftid = file_get_submitted_draft_itemid($feedbackname);
