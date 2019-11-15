@@ -17,8 +17,7 @@
 /**
  * Unit tests for the mulitple choice question definition class.
  *
- * @package    qtype
- * @subpackage multichoice
+ * @package    qtype_multichoiceset
  * @copyright  2009 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -37,6 +36,7 @@ require_once($CFG->dirroot . '/question/type/multichoiceset/questiontype.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class qtype_multichoiceset_test extends advanced_testcase {
+    /** @var $qtype the question type. */
     protected $qtype;
 
     protected function setUp() {
@@ -51,6 +51,11 @@ class qtype_multichoiceset_test extends advanced_testcase {
         $this->assertEquals($this->qtype->name(), 'multichoiceset');
     }
 
+    /**
+     * Get test question data.
+     *
+     * @return stdObject
+     */
     protected function get_test_question_data() {
         $q = new stdClass();
         $q->id = 1;

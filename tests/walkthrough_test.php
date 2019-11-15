@@ -21,8 +21,7 @@
  * tests. (Search for test_question_maker::make_a_multichoice.) This file only
  * contains a few additional tests for problems that were found during testing.
  *
- * @package    qtype
- * @subpackage multichoice
+ * @package    qtype_multichoiceset
  * @copyright  2010 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -45,11 +44,68 @@ class qtype_multichoiceset_walkthrough_test extends qbehaviour_walkthrough_test_
 
     public function test_deferredfeedback_feedback_multichoiceset() {
         // Create a multichoiceset question.
-        $mc = qtype_multichoiceset_test_helper::make_a_multichoiceset_question();
+        $mc = $dd = test_question_maker::make_question('multichoiceset');
         $mc->shuffleanswers = false;
 
         $this->start_attempt_at_question($mc, 'deferredfeedback', 2);
         $this->process_submission($mc->get_correct_response());
+        $this->quba->finish_all_questions();
+
+        // Verify.
+        $this->check_current_state(question_state::$gradedright);
+        $this->check_current_mark(2);
+        $this->check_current_output(
+                $this->get_contains_mc_checkbox_expectation('choice0', false, true),
+                $this->get_contains_mc_checkbox_expectation('choice1', false, false),
+                $this->get_contains_mc_checkbox_expectation('choice2', false, true),
+                $this->get_contains_mc_checkbox_expectation('choice3', false, false),
+                $this->get_contains_correct_expectation(),
+                new question_pattern_expectation('/class="r0 correct"/'),
+                new question_pattern_expectation('/class="r1"/'));
+    }
+
+    public function test_deferredfeedback_resume_multichoiceset_right_right() {
+
+        // Create a multichoiceset question.
+        $mc = $dd = test_question_maker::make_question('multichoiceset');
+        $mc->shuffleanswers = false;
+
+        $this->start_attempt_at_question($mc, 'deferredfeedback', 2);
+        $this->process_submission($mc->get_correct_response());
+        $this->quba->finish_all_questions();
+
+        // Verify.
+        $this->check_current_state(question_state::$gradedright);
+        $this->check_current_mark(2);
+        $this->check_current_output(
+                $this->get_contains_mc_checkbox_expectation('choice0', false, true),
+                $this->get_contains_mc_checkbox_expectation('choice1', false, false),
+                $this->get_contains_mc_checkbox_expectation('choice2', false, true),
+                $this->get_contains_mc_checkbox_expectation('choice3', false, false),
+                $this->get_contains_correct_expectation(),
+                new question_pattern_expectation('/class="r0 correct"/'),
+                new question_pattern_expectation('/class="r1"/'));
+
+        // Save the old attempt.
+        $oldqa = $this->quba->get_question_attempt($this->slot);
+
+        // Reinitialise.
+        $this->setUp();
+        $this->quba->set_preferred_behaviour('deferredfeedback');
+        $this->slot = $this->quba->add_question($mc, 2);
+        $this->quba->start_question_based_on($this->slot, $oldqa);
+
+        // Verify.
+        $this->check_current_state(question_state::$complete);
+        $this->check_output_contains_lang_string('notchanged', 'question');
+        $this->check_current_mark(null);
+        $this->check_current_output(
+               $this->get_contains_mc_checkbox_expectation('choice0', true, true),
+                $this->get_contains_mc_checkbox_expectation('choice1', true, false),
+                $this->get_contains_mc_checkbox_expectation('choice2', true, true),
+                $this->get_contains_mc_checkbox_expectation('choice3', true, false));
+
+        // Now resubmit.
         $this->quba->finish_all_questions();
 
         // Verify.

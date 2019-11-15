@@ -17,8 +17,7 @@
 /**
  * Multiple choice question definition classes.
  *
- * @package    qtype
- * @subpackage multichoiceset
+ * @package    qtype_multichoiceset
  * @copyright  2009 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -79,6 +78,13 @@ class qtype_multichoiceset_question extends qtype_multichoice_multi_question {
         return array($fraction, $state);
     }
 
+    /**
+     * Disable hint settings if too many choices selected
+     *
+     * Disable those hint settings that we don't want when the student has selected
+     * more choices than the number of right choices. This avoids giving the game away.
+     * @param question_hint_with_parts $hint a hint.
+     */
     protected function disable_hint_settings_when_too_many_selected(
             question_hint_with_parts $hint) {
         parent::disable_hint_settings_when_too_many_selected($hint);

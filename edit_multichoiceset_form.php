@@ -17,15 +17,12 @@
 /**
  * Defines the editing form for the multichoiceset question type.
  *
- * @package    qtype
- * @subpackage multichoiceset
+ * @package    qtype_multichoiceset
  * @copyright  2007 Jamie Pratt
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-
 defined('MOODLE_INTERNAL') || die();
-
 
 /**
  * Multiple choice all or nothing editing form definition.
@@ -82,22 +79,35 @@ class qtype_multichoiceset_edit_form extends question_edit_form {
         $this->add_per_answer_fields($mform, get_string('choiceno', 'qtype_multichoice', '{no}'),
                 null, max(5, QUESTION_NUMANS_START));
 
-        $mform->addElement('header', 'overallfeedbackhdr', get_string('overallfeedback', 'qtype_multichoice'));
+        $mform->addElement('header', 'overallfeedbackhdr', get_string('combinedfeedback', 'question'));
 
         foreach (array('correctfeedback', 'incorrectfeedback') as $feedbackname) {
-            $mform->addElement('editor', $feedbackname, get_string($feedbackname, 'qtype_multichoice'),
-                                array('rows' => 10), $this->editoroptions);
+            $element = $mform->addElement('editor', $feedbackname, get_string($feedbackname, 'question'),
+                                array('rows' => 5), $this->editoroptions);
             $mform->setType($feedbackname, PARAM_RAW);
+            $element->setValue(array('text' => get_string($feedbackname.'default', 'question')));
+
             if ($feedbackname == 'incorrectfeedback') {
                 $mform->addElement('advcheckbox', 'shownumcorrect',
                         get_string('options', 'question'),
                         get_string('shownumpartscorrect', 'question'));
             }
         }
-		
+
         $this->add_interactive_settings(true, true);
     }
 
+    /**
+     * Get the list of form elements to repeat, one for each answer.
+     *
+     * @param object $mform the form being built.
+     * @param string $label the label to use for each option.
+     * @param array $gradeoptions the possible grades for each answer.
+     * @param array $repeatedoptions reference to array of repeated options to fill
+     * @param string $answersoption reference to return the name of $question->options
+     *      field holding an array of answers
+     * @return array of form fields.
+     */
     protected function get_per_answer_fields($mform, $label, $gradeoptions,
             &$repeatedoptions, &$answersoption) {
         $repeated = array();
@@ -113,14 +123,26 @@ class qtype_multichoiceset_edit_form extends question_edit_form {
         return $repeated;
     }
 
+    /**
+     * Create the form elements required by one hint.
+     * @param bool $withclearwrong whether this question type uses the 'Clear wrong' option on hints.
+     * @param bool $withshownumpartscorrect whether this quesiton type uses the 'Show num parts correct' option on hints.
+     * @return array form field elements for one hint.
+     */
     protected function get_hint_fields($withclearwrong = false, $withshownumpartscorrect = false) {
-        list($repeated, $repeatedoptions) =
-                parent::get_hint_fields($withclearwrong, $withshownumpartscorrect);
+        list($repeated, $repeatedoptions) = parent::get_hint_fields(
+                $withclearwrong, $withshownumpartscorrect);
         $repeated[] = $this->_form->createElement('advcheckbox', 'hintshowchoicefeedback', '',
                 get_string('showeachanswerfeedback', 'qtype_multichoiceset'));
         return array($repeated, $repeatedoptions);
     }
 
+    /**
+     * Perform any preprocessing needed on the data passed to {@link set_data()}
+     * before it is used to initialise the form.
+     * @param object $question the data being passed to the form.
+     * @return object $question the modified data.
+     */
     protected function data_preprocessing($question) {
         $question = parent::data_preprocessing($question);
         $question = $this->data_preprocessing_answers($question, true);
@@ -153,26 +175,32 @@ class qtype_multichoiceset_edit_form extends question_edit_form {
                 $text = $question->options->$feedbackname;
                 $feedbackformat = $feedbackname . 'format';
                 $format = $question->options->$feedbackformat;
-                $default_values[$feedbackname] = array();
-                $default_values[$feedbackname]['text'] = file_prepare_draft_area(
-                    $draftid,       // draftid
-                    $this->context->id,    // context
-                    'qtype_multichoiceset',   // component
-                    $feedbackname,         // filarea
-                    !empty($question->id)?(int)$question->id:null, // itemid
-                    $this->fileoptions,    // options
-                    $text      // text
+                $defaultvalues[$feedbackname] = array();
+                $defaultvalues[$feedbackname]['text'] = file_prepare_draft_area(
+                    $draftid,
+                    $this->context->id,
+                    'question',
+                    $feedbackname,
+                    !empty($question->id) ? (int)$question->id : null,
+                    $this->fileoptions,
+                    $text
                 );
-                $default_values[$feedbackname]['format'] = $format;
-                $default_values[$feedbackname]['itemid'] = $draftid;
+                $defaultvalues[$feedbackname]['format'] = $format;
+                $defaultvalues[$feedbackname]['itemid'] = $draftid;
             }
-	        // prepare files code block ends
+            // Prepare files code block ends.
 
-            $question = (object)((array)$question + $default_values);
+            $question = (object)((array)$question + $defaultvalues);
         }
         return $question;
     }
 
+    /**
+     * Perform any validation needed
+     * @param object $data the data being returned by the form.
+     * @param array $files any files being returned by the form.
+     * @return array any errors in the form
+     */
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
@@ -191,12 +219,12 @@ class qtype_multichoiceset_edit_form extends question_edit_form {
             }
         }
 
-        // Perform sanity checks on number of correct answers
+        // Perform sanity checks on number of correct answers.
         if ($numberofcorrectanswers == 0) {
             $errors['answer[0]'] = get_string('errnocorrect', 'qtype_multichoiceset');
         }
 
-        // Perform sanity checks on number of answers
+        // Perform sanity checks on number of answers.
         if ($answercount == 0) {
             $errors['answer[0]'] = get_string('notenoughanswers', 'qtype_multichoice', 2);
             $errors['answer[1]'] = get_string('notenoughanswers', 'qtype_multichoice', 2);
@@ -207,6 +235,10 @@ class qtype_multichoiceset_edit_form extends question_edit_form {
         return $errors;
     }
 
+    /**
+     * Return the question type name.
+     * @return string the question type name
+     */
     public function qtype() {
         return 'multichoiceset';
     }
