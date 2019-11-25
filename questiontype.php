@@ -180,7 +180,7 @@ class qtype_multichoiceset extends question_type {
         }
         $options->answernumbering = $question->answernumbering;
         $options->shuffleanswers = $question->shuffleanswers;
-        $options->nograce = $question->nograce;
+        $options->nograce = $question->nograce ?: 0;
         $options->correctfeedback = $this->import_or_save_files($question->correctfeedback,
                 $context, 'question', 'correctfeedback', $question->id);
         $options->correctfeedbackformat = $question->correctfeedback['format'];
@@ -501,6 +501,7 @@ class qtype_multichoiceset extends question_type {
 
         $question = $format->import_headers($data);
         $question->qtype = 'multichoiceset';
+        $question->nograce = 0;
 
         $question->shuffleanswers = $format->trans_single(
                 $format->getpath($data, array('#', 'shuffleanswers', 0, '#'), 1));
